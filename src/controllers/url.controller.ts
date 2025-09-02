@@ -1,41 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { AppError } from "../middlewares/errorHandler.middleware";
 import { generateBase62Hash } from "../utils/generate-url";
-
-export const greetUser = (req: Request, res: Response, next: NextFunction) => {
-  try {
-    // res.json({ message: "Hello, User!" });
-    res.status(200).json({
-      status: "success",
-      data: { message: "Hello, User!" },
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const greetByName = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-) => {
-  try {
-    const name = req.body.userName;
-    if (name != "developer") {
-      const error: AppError = new Error("Only developer is allowed!");
-      error.status = 403;
-      //   throw error;
-      res.status(403).json({ message: error.message });
-      return;
-    }
-    res.status(200).json({
-      status: "success",
-      data: { message: `Hello, ${name}` },
-    });
-  } catch (error) {
-    next(error);
-  }
-};
+import UrlModel from "../models/url.model";
 
 export const createShortUrl = (
   req: Request,
@@ -56,9 +22,21 @@ export const createShortUrl = (
       }
       // if valid, then create short url and return
       // give the counter number here, for now using a static number
-      const shortUrl = generateBase62Hash(415, 5);
+      const shortUrlCode = generateBase62Hash(445, 5);
       // save the shortUrl and longUrl mapping to database
-      res.status(201).json({ status: "success", data: { longUrl, shortUrl } });
+      saveUrlToDB(longUrl, shortUrlCode)
+        .then(() => {
+          // return the shortUrl to user
+          res
+            .status(201)
+            .json({ status: "success", data: { longUrl, shortUrlCode } });
+        })
+        .catch((error) => {
+          const err: AppError = new Error("Database error");
+          err.status = 500;
+          next(error);
+          return;
+        });
     });
   } catch (error) {
     next(error);
@@ -66,6 +44,18 @@ export const createShortUrl = (
   }
 };
 
+async function saveUrlToDB(longUrl: string, shortCode: string) {
+  await UrlModel.create({ shortCode: shortCode, originalUrl: longUrl }).catch(
+    (error) => {
+      if (error.code === 11000) {
+        throw new Error("Short code already exists. Try again.");
+      } else {
+        throw error;
+      }
+    }
+  );
+  console.log("URL mapping saved to database");
+}
 function isValidUrlScheme(url: string): boolean {
   if (!url.match(/^https?:\/\//)) {
     return false;
@@ -80,7 +70,6 @@ async function validateUrl(url: string): Promise<boolean> {
   try {
     const response = await fetch(url, { method: "HEAD" });
     // Check if status code is in the 2xx range
-    console.log(response.status);
     if (response.ok) {
       console.log(`URL is valid: ${url}`);
       return true;
