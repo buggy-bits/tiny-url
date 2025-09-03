@@ -3,7 +3,7 @@ import { AppError } from "../middlewares/errorHandler.middleware";
 import { generateBase62Hash } from "../utils/generate-url";
 import UrlModel from "../models/url.model";
 
-export const createShortUrl = (
+export const createShortUrl = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -11,95 +11,85 @@ export const createShortUrl = (
   try {
     const longUrl = req.body.longUrl;
     // verify the given long url
-    validateUrl(longUrl).then((isValid) => {
-      if (!isValid) {
-        const error: AppError = new Error(
-          "Invalid URL format or unreachable URL"
-        );
-        error.status = 400;
-        next(error);
-        return;
-      }
-    });
+    const isValid = await validateUrl(longUrl);
+
+    if (!isValid) {
+      const error: AppError = new Error(
+        "Invalid URL format or unreachable URL"
+      );
+      error.status = 400;
+      return next(error);
+    }
     // if valid, then check for original url existance in db
-    checkOriginalUrlExistance(longUrl).then((existing) => {
-      if (existing) {
-        // return the existing shortUrl to user
-        res.status(200).json({
-          status: "success",
-          message: "Provided Url already exists",
-          data: { longUrl, shortUrlCode: existing.shortCode },
-        });
-        return;
-      }
-      // if not exist, then generate a new shortUrl
-      // give the counter number here, for now using a timestamp- but this is not good for production
-      const shortUrlCode = generateBase62Hash(Date.now() % 10000, 5);
-      // save the shortUrl and longUrl mapping to database
-      saveUrlToDB(longUrl, shortUrlCode)
-        .then(() => {
-          // return the shortUrl to user
-          res
-            .status(201)
-            .json({ status: "success", data: { longUrl, shortUrlCode } });
-        })
-        .catch((error) => {
-          const err: AppError = new Error("Database error");
-          err.status = 500;
-          next(error);
-          return;
-        });
-    });
+    const existing = await checkOriginalUrlExistance(longUrl);
+
+    if (existing) {
+      return res.status(200).json({
+        status: "success",
+        message: "Provided Url already exists",
+        data: { longUrl, shortUrlCode: existing.shortCode },
+      });
+    }
+
+    // if not exist, then generate a new shortUrl
+    // give the counter number here, for now using a timestamp- but this is not good for production
+    const shortUrlCode = generateBase62Hash(Date.now() % 10000, 5);
+    // save the shortUrl and longUrl mapping to database
+    await saveUrlToDB(longUrl, shortUrlCode);
+
+    return res
+      .status(201)
+      .json({ status: "success", data: { longUrl, shortUrlCode } });
   } catch (error) {
-    next(error);
-    return;
+    return next(error);
   }
 };
 
-export const getDataByShortCode = (
+export const getDataByShortCode = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
     const shortUrlCode = req.params.shortCode;
-    UrlModel.findOne({ shortCode: shortUrlCode }).then((data) => {
-      if (data) {
-        res.status(200).json({ status: "success", data: data });
-      } else {
-        const error: AppError = new Error("Short URL not found");
-        error.status = 404;
-        next(error);
-      }
-    });
+
+    const data = await UrlModel.findOne({ shortCode: shortUrlCode });
+
+    if (!data) {
+      const error: AppError = new Error("Short URL not found");
+      error.status = 404;
+      return next(error);
+    }
+
+    return res.status(200).json({ status: "success", data });
   } catch (error) {
-    next(error);
-    return;
+    return next(error);
   }
 };
 
-export const redirectToOriginalUrl = (
+export const redirectToOriginalUrl = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
   try {
     const shortUrlCode = req.params.shortCode;
-    UrlModel.findOne({ shortCode: shortUrlCode }).then((data) => {
-      if (data) {
-        res.status(302).redirect(data.originalUrl);
-      } else {
-        const error: AppError = new Error("Short URL not found");
-        error.status = 404;
-        next(error);
-      }
-    });
+
+    const data = await UrlModel.findOne({ shortCode: shortUrlCode });
+
+    if (data) {
+      res.status(302).redirect(data.originalUrl);
+    } else {
+      const error: AppError = new Error("Short URL not found");
+      error.status = 404;
+      next(error);
+    }
   } catch (error) {
-    next(error);
-    return;
+    return next(error);
   }
 };
-export async function saveUrlToDB(longUrl: string, shortCode: string) {
+
+async function saveUrlToDB(longUrl: string, shortCode: string) {
   await UrlModel.create({ shortCode: shortCode, originalUrl: longUrl }).catch(
     (error) => {
       if (error.code === 11000) {
