@@ -3,6 +3,7 @@ import { AppError } from "../middlewares/errorHandler.middleware";
 import UserModel from "../models/user.model";
 
 import bcrypt from "bcrypt";
+import { generateAccessToken, generateRefreshToken } from "../utils/token";
 
 const saltRounds = 10;
 
@@ -93,27 +94,40 @@ export const loginUser = (req: Request, res: Response, next: NextFunction) => {
       if (!existingUser) {
         const error: AppError = new Error("Invalid email or password");
         error.status = 401;
-        throw error;
+        return next(error);
       }
       // compare the password
       bcrypt.compare(password, existingUser.password, function (err, result) {
-        if (result) {
-          // correct password
-          res.status(200).json({
-            status: "success",
-            message: "User logged in successfully",
-            data: {
-              userId: existingUser._id,
-              email,
-              userName: existingUser.userName,
-            },
-          });
-        } else {
+        if (!result) {
           // incorrect password
           const error: AppError = new Error("Invalid email or password");
           error.status = 401;
-          throw error;
-        }
+          return next(error);
+        } // correct password, so give user a token
+        const accessToken = generateAccessToken({
+          userId: existingUser._id.toString(),
+        });
+        const refreshToken = generateRefreshToken({
+          userId: existingUser._id.toString(),
+        });
+
+        res.cookie("refreshToken", refreshToken, {
+          httpOnly: true,
+          secure: true,
+          sameSite: "strict",
+          path: "/auth/token/refresh",
+        });
+
+        res.status(200).json({
+          status: "success",
+          message: "User logged in successfully",
+          data: {
+            userId: existingUser._id,
+            email,
+            userName: existingUser.userName,
+          },
+          accessToken,
+        });
       });
     });
   } catch (error) {

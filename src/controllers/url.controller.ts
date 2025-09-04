@@ -2,12 +2,19 @@ import { NextFunction, Request, Response } from "express";
 import { AppError } from "../middlewares/errorHandler.middleware";
 import { generateBase62Hash } from "../utils/generate-url";
 import UrlModel from "../models/url.model";
+import { IAuthenticatedRequest } from "../middlewares/token.middleware";
 
 export const createShortUrl = async (
-  req: Request,
+  req: IAuthenticatedRequest,
   res: Response,
   next: NextFunction
 ) => {
+  const user = req.user;
+  if (!user) {
+    const error: AppError = new Error("Unauthorized");
+    error.status = 401;
+    return next(error);
+  }
   try {
     const longUrl = req.body.longUrl;
     // verify the given long url
@@ -35,7 +42,7 @@ export const createShortUrl = async (
     // give the counter number here, for now using a timestamp- but this is not good for production
     const shortUrlCode = generateBase62Hash(Date.now() % 10000, 5);
     // save the shortUrl and longUrl mapping to database
-    await saveUrlToDB(longUrl, shortUrlCode);
+    await saveUrlToDB(longUrl, shortUrlCode, user);
 
     return res
       .status(201)
@@ -89,16 +96,22 @@ export const redirectToOriginalUrl = async (
   }
 };
 
-async function saveUrlToDB(longUrl: string, shortCode: string) {
-  await UrlModel.create({ shortCode: shortCode, originalUrl: longUrl }).catch(
-    (error) => {
-      if (error.code === 11000) {
-        throw new Error("Short code already exists. Try again.");
-      } else {
-        throw error;
-      }
+async function saveUrlToDB(
+  longUrl: string,
+  shortCode: string,
+  user: { userId: string }
+) {
+  await UrlModel.create({
+    shortCode: shortCode,
+    originalUrl: longUrl,
+    createdBy: user.userId,
+  }).catch((error) => {
+    if (error.code === 11000) {
+      throw new Error("Short code already exists. Try again.");
+    } else {
+      throw error;
     }
-  );
+  });
   console.log("URL mapping saved to database");
 }
 

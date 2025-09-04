@@ -20,6 +20,7 @@ const urlSchema = new mongoose.Schema(
         message: "Invalid URL format",
       },
     },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: "Users" },
   },
   { timestamps: true }
 );
