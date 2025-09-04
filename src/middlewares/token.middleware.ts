@@ -8,7 +8,7 @@ export interface IAuthenticatedRequest extends Request {
     userId: string;
   };
 }
-export const verifyToken = (
+export const verifyToken = async (
   req: IAuthenticatedRequest,
   res: Response,
   next: NextFunction

@@ -1,20 +1,11 @@
 import { Router } from "express";
 import { loginUser, registerUser } from "../controllers/auth.controller";
-import {
-  IAuthenticatedRequest,
-  verifyToken,
-} from "../middlewares/token.middleware";
+import { newAccessToken } from "../controllers/token.controller";
 
 const router = Router();
 // the route /
 
 router.post("/auth/register", registerUser);
 router.post("/auth/login", loginUser);
-router.get(
-  "/auth/greetUser",
-  verifyToken,
-  (req: IAuthenticatedRequest, res) => {
-    res.send("Hello, User!" + req.user?.userId);
-  }
-);
+router.get("/auth/token/refresh", newAccessToken);
 export default router;
