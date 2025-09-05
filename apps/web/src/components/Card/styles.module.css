@@ -1,0 +1,19 @@
+/* Card component styles */
+.card {
+  background-color: #2d3748;
+  border: 1px solid #4a5568;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+.title {
+  font-size: 24px;
+  font-weight: 600;
+  color: white;
+  margin-bottom: 20px;
+}
+
+.content {
+  color: #e2e8f0;
+}
