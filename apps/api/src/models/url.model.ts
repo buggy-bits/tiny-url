@@ -32,6 +32,14 @@ const urlSchema = new mongoose.Schema(
         message: 'Invalid URL format',
       },
     },
+    title: {
+      type: String,
+      required: true,
+    },
+    description: {
+      type: String,
+      required: false,
+    },
     clicks: {
       type: Number,
       default: 0,

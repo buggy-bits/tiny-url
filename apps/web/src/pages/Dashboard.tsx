@@ -7,10 +7,15 @@ import { UrlData } from '../types/url';
 
 export const Dashboard = () => {
   const [longUrl, setLongUrl] = useState('');
+  const [urlTitle, setUrlTitle] = useState('');
+  const [urlDescription, setUrlDescription] = useState('');
   const [loading, setLoading] = useState(false);
   const [urls, setUrls] = useState<UrlData[]>([]);
   const [stats, setStats] = useState({ totalUrls: 0, totalClicks: 0 });
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: 'success' | 'error';
+  } | null>(null);
 
   useEffect(() => {
     loadUrls();
@@ -32,14 +37,20 @@ export const Dashboard = () => {
     setLoading(true);
 
     try {
-      const response = await urlService.createUrl({ longUrl: longUrl.trim() });
+      const response = await urlService.createUrl({
+        longUrl: longUrl.trim(),
+        title: urlTitle.trim(),
+        description: urlDescription.trim(),
+      });
       setToast({
         message: response.message || 'Short URL created successfully!',
         type: 'success',
       });
       setLongUrl('');
+      setUrlTitle('');
+      setUrlDescription('');
       await loadUrls();
-    } catch (error: any) {
+    } catch (error) {
       setToast({
         message: error.response?.data?.message || 'Failed to create short URL',
         type: 'error',
@@ -110,7 +121,7 @@ export const Dashboard = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="longUrl" className="block text-sm font-medium text-gray-700 mb-2">
-                Enter your long URL
+                Enter long URL
               </label>
               <input
                 id="longUrl"
@@ -120,6 +131,37 @@ export const Dashboard = () => {
                 onChange={(e) => setLongUrl(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
                 placeholder="https://example.com/very/long/url"
+              />
+            </div>
+            <div>
+              <label htmlFor="urlTitle" className="block text-sm font-medium text-gray-700 mb-2">
+                Enter your long URL
+              </label>
+              <input
+                id="urlTitle"
+                type="text"
+                required
+                value={urlTitle}
+                onChange={(e) => setUrlTitle(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
+                placeholder="My Favourite Article"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="urlDescription"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
+                Enter your long URL
+              </label>
+              <input
+                id="urlDescription"
+                type="text"
+                required
+                value={urlDescription}
+                onChange={(e) => setUrlDescription(e.target.value)}
+                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
+                placeholder="Describe about this link (optional)"
               />
             </div>
 

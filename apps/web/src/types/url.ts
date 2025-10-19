@@ -1,5 +1,7 @@
 export interface CreateUrlRequest {
   longUrl: string;
+  title?: string;
+  description?: string;
 }
 
 export interface CreateUrlResponse {
@@ -8,12 +10,17 @@ export interface CreateUrlResponse {
   data: {
     longUrl: string;
     shortUrlCode: string;
+    shortUrl?: string;
+    title?: string;
+    description?: string;
   };
 }
 
 export interface UrlData {
   _id: string;
   shortCode: string;
+  title?: string;
+  description?: string;
   originalUrl: string;
   shortUrl?: string;
   createdAt: string;

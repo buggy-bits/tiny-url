@@ -42,6 +42,8 @@ export const UrlCard = ({ url, onDelete, onShowToast }: UrlCardProps) => {
                 <ExternalLink className="w-4 h-4" />
               </a>
             </div>
+            <strong>{url.title}</strong>
+            <p>{url.description}</p>
             <p className="text-sm text-gray-600 truncate" title={url.originalUrl}>
               {url.originalUrl}
             </p>

@@ -18,6 +18,9 @@ export const createShortUrl = async (
   }
   try {
     const longUrl = req.body.longUrl;
+    const title = req.body.title || 'No Title';
+    const description = req.body.description || 'No Description';
+
     // verify the given long url
     const isValid = await validateUrl(longUrl);
 
@@ -45,7 +48,14 @@ export const createShortUrl = async (
     // save the shortUrl and longUrl mapping to database
     const shortUrl =
       req.protocol + '://' + req.get('host') + '/' + shortUrlCode;
-    await saveUrlToDB(longUrl, shortUrlCode, shortUrl, user);
+    await saveUrlToDB(
+      longUrl,
+      shortUrlCode,
+      shortUrl,
+      user,
+      title,
+      description
+    );
     return res
       .status(201)
       .json({ status: 'success', data: { longUrl, shortUrl } });
@@ -252,13 +262,17 @@ async function saveUrlToDB(
   longUrl: string,
   shortCode: string,
   shortUrl: string,
-  user: { userId: string }
+  user: { userId: string },
+  title: string,
+  description: string
 ) {
   await UrlModel.create({
     shortCode: shortCode,
     originalUrl: longUrl,
     shortUrl: shortUrl,
     createdBy: user.userId,
+    title: title,
+    description: description,
   }).catch((error) => {
     if (error.code === 11000) {
       throw new Error('Short code already exists. Try again.');
