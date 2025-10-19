@@ -1,13 +1,23 @@
-/**
- * Custom hook to simplify authentication context usage
- */
-import { useContext } from 'react';
-import { AuthContext } from '../context/AuthContext';
+import { useState, useEffect } from 'react';
+import { authService } from '../services/authService';
+import { User } from '../types/auth';
 
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
-  }
-  return context;
+  const [user, setUser] = useState<User | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const currentUser = authService.getCurrentUser();
+    const authenticated = authService.isAuthenticated();
+    setUser(currentUser);
+    setIsAuthenticated(authenticated);
+  }, []);
+
+  const logout = () => {
+    authService.logout();
+    setUser(null);
+    setIsAuthenticated(false);
+  };
+
+  return { user, isAuthenticated, logout };
 };

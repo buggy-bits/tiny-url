@@ -31,7 +31,7 @@ export const registerUser = (
             'User with given email or username already exists'
           );
           error.status = 409; // conflict
-          throw error;
+          return next(error);
         }
         // hash given password
         bcrypt.genSalt(saltRounds, function (err, salt) {
@@ -109,7 +109,7 @@ export const loginUser = (req: Request, res: Response, next: NextFunction) => {
           httpOnly: true,
           secure: true,
           sameSite: 'strict',
-          path: '/auth/token/refresh',
+          // path: '/auth/token/refresh',
         });
 
         res.status(200).json({
