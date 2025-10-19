@@ -1,135 +1,82 @@
-# Turborepo starter
+# 🔗 TinyUrl
 
-This Turborepo starter is maintained by the Turborepo core team.
+A modern, minimal, and fully functional **URL Shortener** built using the **MERN stack** (MongoDB, Express.js, React, Node.js).  
+TinyUrl allows users to **shorten long URLs**, **manage them through an authenticated dashboard**, **view analytics**, and **name each short link** ✨.
 
-## Using this example
+## Features
 
-Run the following command:
+### 🔐 Authentication
 
-```sh
-npx create-turbo@latest
-```
+- Register and login securely with JWT-based authentication.
+- Tokens are stored safely in `localStorage`.
+- Protected routes on both frontend and backend.
+- Tokens are refreshed automatically.
 
-## What's inside?
+### 🔗 URL Management
 
-This Turborepo includes the following packages/apps:
+- Create short URLs for any long valid link.
+- Each short URL includes:
+  - **Title**
+  - **Description**
+  - **Short code**
+  - **Original URL**
+  - **Created and updated timestamps**
+- Edit or delete URLs anytime.
+- Copy short URL with one click.
+- Auto-generate **QR Code** for each short URL.
+- View all your shortened URLs in a clean dashboard.
 
-### Apps and Packages
+### 📊 Analytics
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+- Track the **number of clicks** for each short URL.
+- View **click logs** with IP and timestamp for every visit.
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+### 💡 Extra
 
-### Utilities
+- Responsive UI using **TailwindCSS**.
+- Toast notifications for success and error feedback.
+- Minimal looks for a smooth user experience.
 
-This Turborepo has some additional tools already setup for you:
+---
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+## 🛠️ Tech Stack
 
-### Build
+### Frontend
 
-To build all apps and packages, run the following command:
+- **React (TypeScript)**
+- **TailwindCSS**
+- **Axios**
+- **React Router**
+- **React-QR-Code**
 
-```
-cd my-turborepo
+### Backend
 
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build
+- **Node.js**
+- **Express.js**
+- **MongoDB + Mongoose**
+- **JWT Authentication**
+- **CORS and dotenv** for security & configuration
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build
-yarn dlx turbo build
-pnpm exec turbo build
-```
+---
 
-You can build a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
+## 🧩 API Endpoints Overview
 
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo build --filter=docs
+### Auth Routes
 
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo build --filter=docs
-yarn exec turbo build --filter=docs
-pnpm exec turbo build --filter=docs
-```
+| Method | Endpoint                | Description                |
+| ------ | ----------------------- | -------------------------- |
+| POST   | `/api/v1/auth/register` | Register new user          |
+| POST   | `/api/v1/auth/login`    | Login and get access token |
 
-### Develop
+### URL Routes (Protected)
 
-To develop all apps and packages, run the following command:
+| Method | Endpoint                       | Description                                     |
+| ------ | ------------------------------ | ----------------------------------------------- |
+| POST   | `/api/v1/urls`                 | Create short URL (includes title & description) |
+| GET    | `/api/v1/urls`                 | Get all URLs of logged-in user                  |
+| GET    | `/api/v1/urls/:shortCode`      | Get details of a short URL                      |
+| PUT    | `/api/v1/urls/:shortCode`      | Update long URL, title, or description          |
+| DELETE | `/api/v1/urls/:shortCode`      | Delete short URL                                |
+| GET    | `/api/v1/urls/:shortCode/logs` | Get click analytics                             |
 
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev
-yarn exec turbo dev
-pnpm exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters):
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo dev --filter=web
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo dev --filter=web
-yarn exec turbo dev --filter=web
-pnpm exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-```
-cd my-turborepo
-
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo login
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo login
-yarn exec turbo login
-pnpm exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-```
-# With [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation) installed (recommended)
-turbo link
-
-# Without [global `turbo`](https://turborepo.com/docs/getting-started/installation#global-installation), use your package manager
-npx turbo link
-yarn exec turbo link
-pnpm exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.com/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.com/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.com/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.com/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.com/docs/reference/configuration)
-- [CLI Usage](https://turborepo.com/docs/reference/command-line-reference)
+---
