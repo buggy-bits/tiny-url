@@ -3,18 +3,13 @@ import routes from './routes';
 import { errorHandler } from './middlewares/errorHandler.middleware';
 import { redirectToOriginalUrl } from './controllers/url.controller';
 import cors from 'cors';
+import { corsOptions } from './config/cors';
 
 const app = express();
 app.use(express.json());
 // Routes
 // cors configuration
-app.use(
-  cors({
-    origin: '*', // Allow all origins for simplicity; adjust as needed for security
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization'],
-  })
-);
+app.use(cors(corsOptions));
 app.get('/:shortCode', redirectToOriginalUrl);
 app.use('/api/v1/', routes);
 app.get('/health/test', (req, res) => {
