@@ -7,6 +7,7 @@ import { UrlDetails } from './pages/UrlDetails';
 import { NotFound } from './pages/NotFound';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { authService } from './services/authService';
+import { LandingPage } from './pages/LandingPage';
 
 function App() {
   const isAuthenticated = authService.isAuthenticated();
@@ -16,13 +17,7 @@ function App() {
       <Routes>
         <Route
           path="/"
-          element={
-            isAuthenticated ? (
-              <Navigate to="/dashboard" replace />
-            ) : (
-              <Navigate to="/login" replace />
-            )
-          }
+          element={isAuthenticated ? <Navigate to="/dashboard" replace /> : <LandingPage />}
         />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />

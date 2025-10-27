@@ -4,11 +4,24 @@ import { RegisterRequest, LoginRequest, AuthResponse } from '../types/auth';
 export const authService = {
   register: async (data: RegisterRequest): Promise<AuthResponse> => {
     const response = await api.post('/api/v1/auth/register', data);
+    if (response.data.accessToken) {
+      localStorage.setItem('accessToken', response.data.accessToken);
+      localStorage.setItem('user', JSON.stringify(response.data.data));
+    }
     return response.data;
   },
 
   login: async (data: LoginRequest): Promise<AuthResponse> => {
     const response = await api.post('/api/v1/auth/login', data);
+    if (response.data.accessToken) {
+      localStorage.setItem('accessToken', response.data.accessToken);
+      localStorage.setItem('user', JSON.stringify(response.data.data));
+    }
+    return response.data;
+  },
+
+  gust_login: async (): Promise<AuthResponse> => {
+    const response = await api.get('/api/v1/auth/iamguest');
     if (response.data.accessToken) {
       localStorage.setItem('accessToken', response.data.accessToken);
       localStorage.setItem('user', JSON.stringify(response.data.data));

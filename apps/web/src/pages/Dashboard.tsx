@@ -135,7 +135,7 @@ export const Dashboard = () => {
             </div>
             <div>
               <label htmlFor="urlTitle" className="block text-sm font-medium text-gray-700 mb-2">
-                Enter your long URL
+                Give your URL a title
               </label>
               <input
                 id="urlTitle"
@@ -152,16 +152,15 @@ export const Dashboard = () => {
                 htmlFor="urlDescription"
                 className="block text-sm font-medium text-gray-700 mb-2"
               >
-                Enter your long URL
+                A short description (optional)
               </label>
               <input
                 id="urlDescription"
                 type="text"
-                required
                 value={urlDescription}
                 onChange={(e) => setUrlDescription(e.target.value)}
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-shadow"
-                placeholder="Describe about this link (optional)"
+                placeholder="Describe about this link"
               />
             </div>
 

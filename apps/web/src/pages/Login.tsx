@@ -8,7 +8,10 @@ export const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: 'success' | 'error';
+  } | null>(null);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: FormEvent) => {
@@ -19,9 +22,26 @@ export const Login = () => {
       await authService.login({ email, password });
       setToast({ message: 'Login successful!', type: 'success' });
       setTimeout(() => navigate('/dashboard'), 500);
-    } catch (error: any) {
+    } catch (error) {
       setToast({
         message: error.response?.data?.message || 'Login failed',
+        type: 'error',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGuestLogin = async () => {
+    setLoading(true);
+
+    try {
+      await authService.gust_login();
+      setToast({ message: 'Guest login successful!', type: 'success' });
+      setTimeout(() => navigate('/dashboard'), 500);
+    } catch (error) {
+      setToast({
+        message: error.response?.data?.message || 'Guest login failed',
         type: 'error',
       });
     } finally {
@@ -96,6 +116,16 @@ export const Login = () => {
             </Link>
           </p>
         </div>
+        <button
+          type="submit"
+          disabled={loading}
+          onClick={() => {
+            handleGuestLogin();
+          }}
+          className="w-full mt-7 bg-gray-700 text-white py-2.5 rounded-lg font-medium hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {loading ? 'Signing you...' : 'Try as Guest'}
+        </button>
       </div>
 
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}

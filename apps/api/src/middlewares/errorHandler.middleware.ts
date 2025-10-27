@@ -16,6 +16,9 @@ export const errorHandler = (
   }
   console.log('Error handler middleware called');
   res.status(err.status || 500).json({
-    message: err.message || 'Internal Server Error',
+    message:
+      process.env.NODE_ENV !== 'production'
+        ? err.message
+        : 'Internal Server Error',
   });
 };

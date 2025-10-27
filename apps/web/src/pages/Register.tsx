@@ -9,7 +9,10 @@ export const Register = () => {
   const [userName, setUserName] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
+  const [toast, setToast] = useState<{
+    message: string;
+    type: 'success' | 'error';
+  } | null>(null);
   const navigate = useNavigate();
 
   const handleSubmit = async (e: FormEvent) => {
@@ -18,9 +21,12 @@ export const Register = () => {
 
     try {
       await authService.register({ email, userName, password });
-      setToast({ message: 'Registration successful! Please login.', type: 'success' });
-      setTimeout(() => navigate('/login'), 1500);
-    } catch (error: any) {
+      setToast({
+        message: 'Registration successful! Redirecting...',
+        type: 'success',
+      });
+      setTimeout(() => navigate('/dashboard'), 1500);
+    } catch (error) {
       setToast({
         message: error.response?.data?.message || 'Registration failed',
         type: 'error',
